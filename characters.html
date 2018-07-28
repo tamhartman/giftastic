@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Giphy Project</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+  crossorigin="anonymous">
+  <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+</head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+<body>
+<div class="btn-group col-lg-12" id="buttons" role="group">
+  <button type="button" class="btn btn-default gif" data-topics="Vaporwave">
+    Vaporwave
+  </button>
+  <button type="button" class="btn btn-default gif" data-topics="Video Games">
+   Video Games
+  </button>
+  <button type="button" class="btn btn-default gif"data-topics="Reality TV">
+    Reality TV
+  </button>
+</div>
+<div id="container" class="col-lg-12">
+    <div id="panel" class="col-lg-4">
+        <form id="topic-form">
+            <label for="topic-input">Add a Topic</label>
+            <br>
+            <input type="text" id="topic-input">
+            <br>
+            <input id="user-input" type="submit" value="Submit">
+        </form>
+    </div>
+</div>
+
+  <div id="gifs-appear-here">
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    // Event listener for all button elements
+    $("button").on("click", function() {
+      // In this case, the "this" keyword refers to the button that was clicked
+      console.log("new topic submitted");
+      var topics = $(this).attr("data-topics");
+
+      // Constructing a URL to search Giphy for the name of the topics who said the quote
+      var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+        topics + "&api_key=5Lvlw5x0M0fmNaQYOIujNZoOu7MhNe4B&limit=30";
+
+      // Performing our AJAX GET request
+      $.ajax({
+        url: queryURL,
+        method: "GET"
+      })
+        // After the data comes back from the API
+        .then(function(response) {
+          //create a container for the results
+          var container = ("#container");
+          //container.empty();
+          // Storing an array of results in the results variable
+          var results = response.data;
+
+          // Looping over every result item
+          for (var i = 0; i < results.length; i++) {
+
+            // Only taking action if the photo has an appropriate rating
+            if (results[i].rating !== "r") {
+              // Creating a div with the class "item"
+              var gifDiv = $("<div class='item'>");
+
+              // Storing the result item's rating
+              var rating = results[i].rating;
+
+              // Creating a paragraph tag with the result item's rating
+              var p = $("<p>").text("Rating: " + rating);
+
+              // Creating an image tag
+              var topicsImage = $("<img>");
+            
+              // Giving the image tag an src attribute of a proprty pulled off the
+              // result item                            
+              topicsImage.attr("animated", results[i].images.fixed_height.url);
+              topicsImage.attr("still", results[i].images.fixed_height_still.url);
+              topicsImage.attr("src", results[i].images.fixed_height_small_still.url);
+              topicsImage.attr("state", "still");
+              topicsImage.addClass("gif");
+
+              // Appending the paragraph and topicsImage we created to the "gifDiv" div we created
+              gifDiv.append(p);
+              gifDiv.append(topicsImage);
+
+              // Prepending the gifDiv to the "#gifs-appear-here" div in the HTML
+              $("#gifs-appear-here").prepend(gifDiv);
+            }
+          }
+        });
+    });
+    $("#user-input").on("click", function (event) {
+            event.preventDefault();
+            var newtopic = $("#topic-input").val().trim();
+            var topics = $("<button>");
+            var container = $("#buttons");
+            topics.attr("type", "button");
+            topics.addClass("btn btn-default gif");
+            topics.attr("data-topic", newtopic);
+            topics.text(newtopic);
+            console.log(newtopic);
+            container.append(topics);
+            console.log(topics);
+        });
+        $(document).on("click", ".gif", function () {
+            var state = $(this).attr("state");
+            console.log(state);
+            if (state === "still") {
+                var imgAnimate = $(this).attr("animated");
+                $(this).attr("src", imgAnimate);
+                $(this).attr("state", "animated");
+            }
+            else {
+                var imgStill = $(this).attr("still");
+                $(this).attr("src", imgStill);
+                $(this).attr("state", "still");
+            }
+        }
+    );
+  </script>
+</body>
+
+</html>
